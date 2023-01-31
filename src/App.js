@@ -8,7 +8,7 @@ const App = () => {
   const [error, setError] = useState(null)
   const [tasks, setTasks] = useState([])
 
-  const fetchTasks = async (taskText) => {
+  const fetchTasks = async () => {
     setIsLoading(true)
     setError(null)
 
