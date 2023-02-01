@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback, useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 
 import NewTask from "./components/NewTask/NewTask";
 import Tasks from "./components/Tasks/Tasks";
@@ -6,23 +6,22 @@ import useHttp from "./hooks/use-http";
 
 const App = () => {
   const [tasks, setTasks] = useState([])
-
-  const transformTasks = useCallback((tasksObj) => {
-    const loadedTasks = []
-
-      for(const taskKey in tasksObj) {
-        loadedTasks.push({id: taskKey, text: tasksObj[taskKey].text})
-      }
-
-      setTasks(loadedTasks)
-  }, [])
-
-  const httpData = useHttp(transformTasks)
-
-  const { isLoading, error, sendRequest: fetchTasks } = httpData
-
+    
+  const { isLoading, error, sendRequest: fetchTasks } = useHttp()
+  
   useEffect(() => {
-    fetchTasks({url: 'https://custom-hooks-cdbf3-default-rtdb.asia-southeast1.firebasedatabase.app/tasks.json'})
+    const transformTasks = (tasksObj) => {
+      const loadedTasks = []
+  
+        for(const taskKey in tasksObj) {
+          loadedTasks.push({id: taskKey, text: tasksObj[taskKey].text})
+        }
+  
+        setTasks(loadedTasks)
+    }
+
+    fetchTasks({url: 'https://custom-hooks-cdbf3-default-rtdb.asia-southeast1.firebasedatabase.app/tasks.json'}, transformTasks)
+
   }, [fetchTasks])
 
   const taskAddHandler = (task) => {
