@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useCallback, useEffect, useState } from "react";
 
 import NewTask from "./components/NewTask/NewTask";
 import Tasks from "./components/Tasks/Tasks";
@@ -7,7 +7,7 @@ import useHttp from "./hooks/use-http";
 const App = () => {
   const [tasks, setTasks] = useState([])
 
-  const transformTasks = (tasksObj) => {
+  const transformTasks = useCallback((tasksObj) => {
     const loadedTasks = []
 
       for(const taskKey in tasksObj) {
@@ -15,16 +15,15 @@ const App = () => {
       }
 
       setTasks(loadedTasks)
-  }
+  }, [])
 
-  const httpData = useHttp({url: 'https://custom-hooks-cdbf3-default-rtdb.asia-southeast1.firebasedatabase.app/tasks.json'}, transformTasks)
+  const httpData = useHttp(transformTasks)
 
   const { isLoading, error, sendRequest: fetchTasks } = httpData
 
   useEffect(() => {
-    fetchTasks()
-  }, [])
-  // if fetchTasks add as a dependency in the useEffect it will create a infinite loop; why
+    fetchTasks({url: 'https://custom-hooks-cdbf3-default-rtdb.asia-southeast1.firebasedatabase.app/tasks.json'})
+  }, [fetchTasks])
 
   const taskAddHandler = (task) => {
     setTasks((prevTasks) => prevTasks.concat(task))
