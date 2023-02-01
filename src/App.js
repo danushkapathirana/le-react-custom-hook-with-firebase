@@ -2,42 +2,29 @@ import React, { Fragment, useEffect, useState } from "react";
 
 import NewTask from "./components/NewTask/NewTask";
 import Tasks from "./components/Tasks/Tasks";
+import useHttp from "./hooks/use-http";
 
 const App = () => {
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState(null)
   const [tasks, setTasks] = useState([])
 
-  const fetchTasks = async () => {
-    setIsLoading(true)
-    setError(null)
+  const transformTasks = (tasksObj) => {
+    const loadedTasks = []
 
-    try{
-      const response = await fetch('https://custom-hooks-cdbf3-default-rtdb.asia-southeast1.firebasedatabase.app/tasks.json')
-
-      if(!response.ok) {
-        throw new Error("Request failed.!")
-      }
-
-      const data = await response.json()
-
-      const loadedTasks = []
-
-      for(const taskKey in data) {
-        loadedTasks.push({id: taskKey, text: data[taskKey].text})
+      for(const taskKey in tasksObj) {
+        loadedTasks.push({id: taskKey, text: tasksObj[taskKey].text})
       }
 
       setTasks(loadedTasks)
-
-    } catch (err) {
-      setError(err.message || "Something went wrong.!")
-    }
-    setIsLoading(false)
   }
+
+  const httpData = useHttp({url: 'https://custom-hooks-cdbf3-default-rtdb.asia-southeast1.firebasedatabase.app/tasks.json'}, transformTasks)
+
+  const { isLoading, error, sendRequest: fetchTasks } = httpData
 
   useEffect(() => {
     fetchTasks()
   }, [])
+  // if fetchTasks add as a dependency in the useEffect it will create a infinite loop; why
 
   const taskAddHandler = (task) => {
     setTasks((prevTasks) => prevTasks.concat(task))
@@ -52,3 +39,5 @@ const App = () => {
 }
 
 export default App
+
+// when use set states in custom hook, the component where use the custom hook will be re-rendered
